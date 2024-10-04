@@ -1,0 +1,40 @@
+{
+	"schemaVersion": 1,
+	"id": "functioneditor",
+	"version": "${version}",
+	"name": "Function Editor",
+	"description": "A Minecraft mod for editing and visualizing functions from in-game.",
+	"authors": [
+		"Mat0u5"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/Mat0u5/FunctionEditor"
+	},
+	"license": "MIT",
+	"icon": "assets/functioneditor/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.mat0u5.functioneditor.Main"
+		],
+		"client": [
+			"net.mat0u5.functioneditor.MainClient"
+		],
+		"fabric-datagen": [
+			"net.mat0u5.functioneditor.MainDataGenerator"
+		]
+	},
+	"mixins": [
+		"functioneditor.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.14.21",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
