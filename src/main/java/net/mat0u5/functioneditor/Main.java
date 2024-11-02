@@ -20,6 +20,7 @@ public class Main implements ModInitializer {
 		LOGGER.info("[SERVER] Initializing Function Editor...");
 		ModRegistries.registerModStuff();
 		NetworkHandler.registerPackets();
+		NetworkHandler.registerServerReceiver();
 	}
 
 

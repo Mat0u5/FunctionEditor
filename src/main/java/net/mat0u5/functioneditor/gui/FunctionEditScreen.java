@@ -9,26 +9,32 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.client.gui.widget.ButtonWidget;
 
+import java.util.List;
+
 public class FunctionEditScreen extends Screen {
-    private final String originalDataJson; // The original function data in JSON format
+    private final String originalRecieveType;
+    private final String originalFunction;
+    private final List<String> originalLines;
     private TextFieldWidget textField; // Text field for editing function data
 
-    public FunctionEditScreen(String functionDataJson) {
+    public FunctionEditScreen(String recieveType, String function, List<String> lines) {
         super(Text.of("Edit Function Data")); // Set the screen title
-        this.originalDataJson = functionDataJson; // Store the original data
+        this.originalRecieveType = recieveType;
+        this.originalFunction = function;
+        this.originalLines = lines;
     }
 
     @Override
     protected void init() {
         // Create and set up the text field for editing
         textField = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, this.height / 2 - 50, 200, 20, Text.of("Function Data"));
-        textField.setText(originalDataJson); // Set the initial text to the original data
+        textField.setText(originalLines.toString()); // Set the initial text to the original data
         this.addDrawableChild(textField); // Add the text field to the screen
 
         // Create the save button using the builder pattern
         this.addDrawableChild(ButtonWidget.builder(Text.of("Save"), button -> {
             // When clicked, send the edited data back to the server
-            NetworkHandler.sendEditedFunctionDataToServer(textField.getText());
+            NetworkHandler.sendFunctionDataToServer(originalRecieveType, originalFunction, List.of(textField.getText()));
             this.close(); // Close the screen after saving
         }).dimensions(this.width / 2 - 100, this.height / 2, 200, 20).build());
 

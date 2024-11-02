@@ -12,6 +12,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.GameMode;
 
+import java.util.List;
+
 public class Events {
 
     public static void register() {
@@ -27,7 +29,7 @@ public class Events {
         try {
             if (player.hasPermissionLevel(2)) {
                 String functionData = FunctionDataGetter.getFunctionDataJson();
-                NetworkHandler.sendFunctionDataToClient(player, functionData);
+                NetworkHandler.sendFunctionDataToClient(player, "send","dom:test", List.of(functionData));
             }
         }catch (Exception e) {}
     }

@@ -7,12 +7,16 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
-public record FunctionDataPayload(String dataJson) implements CustomPayload {
+import java.util.List;
+
+public record FunctionDataPayload(String sendInfo, String function, List<String> lines) implements CustomPayload {
 
     public static final CustomPayload.Id<FunctionDataPayload> ID = new CustomPayload.Id<>(Identifier.of(Main.MOD_ID, "function_data"));
     public static final PacketCodec<RegistryByteBuf, FunctionDataPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.STRING, FunctionDataPayload::dataJson
-            , FunctionDataPayload::new
+            PacketCodecs.STRING, FunctionDataPayload::sendInfo,
+            PacketCodecs.STRING, FunctionDataPayload::function,
+            PacketCodecs.STRING.collect(PacketCodecs.toList()), FunctionDataPayload::lines,
+            FunctionDataPayload::new
     );
 
     @Override

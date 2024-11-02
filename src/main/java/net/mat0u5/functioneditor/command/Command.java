@@ -11,6 +11,8 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 
+import java.util.List;
+
 import static net.minecraft.server.command.CommandManager.literal;
 
 
@@ -30,7 +32,7 @@ public class Command {
         final PlayerEntity self = source.getPlayer();
 
         String functionData = FunctionDataGetter.getFunctionDataJson();
-        NetworkHandler.sendFunctionDataToClient(source.getPlayer(), functionData);
+        NetworkHandler.sendFunctionDataToClient(source.getPlayer(), "send","dom:test2", List.of(functionData));
 
         self.sendMessage(Text.of("Command Worked!"));
         return 1;
