@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class Main implements ModInitializer, ClientModInitializer {
+public class Main implements ModInitializer {
 	public static final String MOD_ID = "functioneditor";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static ConfigManager config;
@@ -20,14 +20,6 @@ public class Main implements ModInitializer, ClientModInitializer {
 		LOGGER.info("[SERVER] Initializing Function Editor...");
 		ModRegistries.registerModStuff();
 		NetworkHandler.registerPackets();
-	}
-
-	@Override
-	public void onInitializeClient() {
-		//config = new ConfigManager("./config/"+MOD_ID+".properties");
-		LOGGER.info("[CLIENT] Initializing Function Editor...");
-		ModRegistries.registerModStuff();
-		NetworkHandler.registerClientPackets();
 	}
 
 

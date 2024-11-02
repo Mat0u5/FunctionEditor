@@ -13,7 +13,6 @@ public class NetworkHandler {
     public static void registerPackets() {
         // Server to Client
         PayloadTypeRegistry.playS2C().register(FunctionDataPayload.ID, FunctionDataPayload.CODEC);
-
         // Client to Server
         PayloadTypeRegistry.playC2S().register(EditedFunctionDataPayload.ID, EditedFunctionDataPayload.CODEC);
     }
@@ -23,8 +22,6 @@ public class NetworkHandler {
         ClientPlayNetworking.registerGlobalReceiver(FunctionDataPayload.ID, (payload, context) -> {
             MinecraftClient client = context.client();
             client.execute(() -> {
-                // Open the client screen with received function data
-                System.out.println("test0_"+payload);
                 client.setScreen(new FunctionEditScreen(payload.dataJson()));
             });
         });
