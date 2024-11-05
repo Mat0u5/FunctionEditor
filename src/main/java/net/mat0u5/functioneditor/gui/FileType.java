@@ -4,7 +4,7 @@ import java.io.File;
 
 /*
     Created by masa (https://github.com/maruohon/litematica),
-    Modified by me
+    Modified by Mat0u5
 */
 public enum FileType
 {
@@ -16,8 +16,7 @@ public enum FileType
     MCMETA;
 
 
-    public static FileType fromFile(File file)
-    {
+    public static FileType fromFile(File file) {
         if (file.isFile() && file.canRead())
         {
             String name = file.getName();

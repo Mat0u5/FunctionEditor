@@ -10,10 +10,9 @@ import net.mat0u5.functioneditor.Main;
 import net.minecraft.util.Identifier;
 /*
     Created by masa (https://github.com/maruohon/litematica),
-    Modified by me
+    Modified by Mat0u5
 */
-public enum Icons implements IGuiIcon, IFileBrowserIconProvider
-{
+public enum Icons implements IGuiIcon, IFileBrowserIconProvider {
     DUMMY                   (  0,   0,  0,  0),
     BUTTON_PLUS_MINUS_8     (  0,   0,  8,  8),
     BUTTON_PLUS_MINUS_12    ( 24,   0, 12, 12),
