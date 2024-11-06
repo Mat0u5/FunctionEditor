@@ -13,11 +13,14 @@ import fi.dy.masa.malilib.gui.widgets.*;
 import fi.dy.masa.malilib.util.GuiUtils;
 import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.StringUtils;
+import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase;
 import net.mat0u5.functioneditor.gui.widgets.WidgetSchematicBrowser;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
+import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_DirectoryEntry;
+import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
 
 import java.io.File;
 import java.util.Collection;
@@ -26,7 +29,7 @@ import java.util.Collection;
     Created by masa (https://github.com/maruohon/litematica),
     Modified by Mat0u5
 */
-public class GuiFileBrowser extends GuiListBase<WidgetFileBrowserBase.DirectoryEntry, WidgetDirectoryEntry, WidgetSchematicBrowser> {
+public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_WidgetDirectoryEntry, WidgetSchematicBrowser> {
     public GuiFileBrowser()
     {
         super(12,24);
@@ -43,7 +46,7 @@ public class GuiFileBrowser extends GuiListBase<WidgetFileBrowserBase.DirectoryE
 
     @Override
     @Nullable
-    protected ISelectionListener<WidgetFileBrowserBase.DirectoryEntry> getSelectionListener()
+    protected ISelectionListener<Client_DirectoryEntry> getSelectionListener()
     {
         return null;
     }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.mat0u5.functioneditor.Main;
+import net.mat0u5.functioneditor.gui.FileEditorFilter;
 import net.mat0u5.functioneditor.gui.GuiFileBrowser;
 import net.mat0u5.functioneditor.gui.Icons;
 import net.mat0u5.functioneditor.utils.DataManager;
@@ -19,11 +20,13 @@ import net.minecraft.util.Identifier;
 
 import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetFileBrowserBase;
+import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_DirectoryEntry;
+import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-public class WidgetSchematicBrowser extends WidgetFileBrowserBase
+public class WidgetSchematicBrowser extends Client_WidgetFileBrowserBase
 {
     protected static final FileFilter FILE_FILTER = new FileEditorFilter();
 
@@ -33,7 +36,7 @@ public class WidgetSchematicBrowser extends WidgetFileBrowserBase
     protected final int infoWidth;
     protected final int infoHeight;
 
-    public WidgetSchematicBrowser(int x, int y, int width, int height, GuiFileBrowser parent, @Nullable ISelectionListener<DirectoryEntry> selectionListener)
+    public WidgetSchematicBrowser(int x, int y, int width, int height, GuiFileBrowser parent, @Nullable ISelectionListener<Client_DirectoryEntry> selectionListener)
     {
         super(x, y, width, height, DataManager.getDirectoryCache(), parent.getBrowserContext(),
                 parent.getDefaultDirectory(), selectionListener, Icons.FILE_ICON_LITEMATIC);
@@ -64,7 +67,6 @@ public class WidgetSchematicBrowser extends WidgetFileBrowserBase
         return DataManager.getSchematicsBaseDirectory();
     }
 
-    @Override
     protected FileFilter getFileFilter()
     {
         return FILE_FILTER;
@@ -76,7 +78,7 @@ public class WidgetSchematicBrowser extends WidgetFileBrowserBase
         this.drawSelectedFileInfo(this.getLastSelectedEntry(), drawContext);
     }
 
-    protected void drawSelectedFileInfo(@Nullable DirectoryEntry entry, DrawContext drawContext)
+    protected void drawSelectedFileInfo(@Nullable Client_DirectoryEntry entry, DrawContext drawContext)
     {
         int x = this.posX + this.totalWidth - this.infoWidth;
         int y = this.posY;
@@ -265,17 +267,5 @@ public class WidgetSchematicBrowser extends WidgetFileBrowserBase
         }
     }
 
-    public static class FileEditorFilter implements FileFilter
-    {
-        @Override
-        public boolean accept(File pathName)
-        {
-            String name = pathName.getName();
-            return  name.endsWith(".mcfunction") ||
-                    name.endsWith(".zip") ||
-                    name.endsWith(".json") ||
-                    name.endsWith(".mcmeta");
-        }
-    }
 }
 
