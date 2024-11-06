@@ -3,10 +3,11 @@ package net.mat0u5.functioneditor.gui;
 
 import java.io.File;
 
-import fi.dy.masa.malilib.gui.interfaces.IFileBrowserIconProvider;
 import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
 import fi.dy.masa.malilib.render.RenderUtils;
 import net.mat0u5.functioneditor.Main;
+import net.mat0u5.functioneditor.files.ClientFile;
+import net.mat0u5.functioneditor.files.FileType;
 import net.minecraft.util.Identifier;
 /*
     Created by masa (https://github.com/maruohon/litematica),
@@ -133,7 +134,21 @@ public enum Icons implements IGuiIcon, IFileBrowserIconProvider {
         }
 
         FileType fileType = FileType.fromFile(file);
+        return getIconForFileType(fileType);
+    }
+    @Override
+    public IGuiIcon getIconForClientFile(ClientFile file)
+    {
+        if (this == DUMMY)
+        {
+            return null;
+        }
 
+        FileType fileType = FileType.fromClientFile(file);
+        return getIconForFileType(fileType);
+    }
+    @Override
+    public IGuiIcon getIconForFileType(FileType fileType) {
         switch (fileType)
         {
             case MCFUNCTION:    return FILE_ICON_MCFUNCTION;

@@ -2,34 +2,25 @@ package net.mat0u5.functioneditor.gui;
 
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.gui.GuiListBase;
-import fi.dy.masa.malilib.gui.GuiStringListSelection;
-import fi.dy.masa.malilib.gui.Message;
 import fi.dy.masa.malilib.gui.button.ButtonBase;
 import fi.dy.masa.malilib.gui.button.ButtonGeneric;
 import fi.dy.masa.malilib.gui.button.IButtonActionListener;
 import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
-import fi.dy.masa.malilib.gui.interfaces.IStringListConsumer;
 import fi.dy.masa.malilib.gui.widgets.*;
-import fi.dy.masa.malilib.util.GuiUtils;
-import fi.dy.masa.malilib.util.InfoUtils;
 import fi.dy.masa.malilib.util.StringUtils;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase;
-import net.mat0u5.functioneditor.gui.widgets.WidgetSchematicBrowser;
+import net.mat0u5.functioneditor.files.ClientFile;
+import net.mat0u5.functioneditor.files.DataManager;
+import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowser;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_DirectoryEntry;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
-
-import java.io.File;
-import java.util.Collection;
+import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowserBase.Client_DirectoryEntry;
+import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
 
 /*
     Created by masa (https://github.com/maruohon/litematica),
     Modified by Mat0u5
 */
-public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_WidgetDirectoryEntry, WidgetSchematicBrowser> {
+public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_WidgetDirectoryEntry, WidgetFileBrowser> {
     public GuiFileBrowser()
     {
         super(12,24);
@@ -37,11 +28,11 @@ public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_Wi
     }
 
     @Override
-    protected WidgetSchematicBrowser createListWidget(int listX, int listY)
+    protected WidgetFileBrowser createListWidget(int listX, int listY)
     {
         // The width and height will be set to the actual values in initGui()
 
-        return new WidgetSchematicBrowser(listX, listY, 100, 100, this, this.getSelectionListener());
+        return new WidgetFileBrowser(listX, listY, 100, 100, this, this.getSelectionListener());
     }
 
     @Override
@@ -69,10 +60,9 @@ public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_Wi
     }
 
 
-    public File getDefaultDirectory()
+    public ClientFile getDefaultDirectory()
     {
-        return new File(".");
-        //return DataManager.getSchematicsBaseDirectory();
+        return DataManager.getDatapackBaseDirectory();
     }
 
 

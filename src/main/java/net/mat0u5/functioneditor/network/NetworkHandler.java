@@ -4,7 +4,6 @@ import fi.dy.masa.malilib.gui.GuiBase;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.mat0u5.functioneditor.gui.FunctionEditScreen;
 import net.mat0u5.functioneditor.gui.GuiFileBrowser;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;

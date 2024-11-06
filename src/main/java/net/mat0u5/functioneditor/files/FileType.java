@@ -1,4 +1,4 @@
-package net.mat0u5.functioneditor.gui;
+package net.mat0u5.functioneditor.files;
 
 import java.io.File;
 
@@ -17,6 +17,14 @@ public enum FileType
 
 
     public static FileType fromFile(File file) {
+        if (file.isFile() && file.canRead())
+        {
+            String name = file.getName();
+            return fromString(name);
+        }
+        return INVALID;
+    }
+    public static FileType fromClientFile(ClientFile file) {
         if (file.isFile() && file.canRead())
         {
             String name = file.getName();

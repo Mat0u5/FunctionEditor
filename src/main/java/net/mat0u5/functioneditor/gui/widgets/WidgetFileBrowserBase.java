@@ -1,46 +1,38 @@
 package net.mat0u5.functioneditor.gui.widgets;
 
-import fi.dy.masa.malilib.gui.interfaces.*;
-import fi.dy.masa.malilib.gui.widgets.WidgetDirectoryNavigation;
+import fi.dy.masa.malilib.gui.interfaces.IGuiIcon;
+import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetListBase;
 import fi.dy.masa.malilib.gui.widgets.WidgetListEntryBase;
 import fi.dy.masa.malilib.render.RenderUtils;
-import fi.dy.masa.malilib.util.FileUtils;
-import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import net.mat0u5.functioneditor.gui.FileEditorFilter;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_DirectoryEntry;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_DirectoryEntryType;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_FileFilterDirectories;
-import net.mat0u5.functioneditor.utils.DataManager;
+import net.mat0u5.functioneditor.files.*;
+import net.mat0u5.functioneditor.gui.IDirectoryNavigator;
+import net.mat0u5.functioneditor.gui.IFileBrowserIconProvider;
+import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowserBase.Client_DirectoryEntry;
+import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.Nullable;
 
-public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry, Client_WidgetDirectoryEntry> implements IDirectoryNavigator {
-    protected static final FileFilter FILE_FILTER = new FileEditorFilter();
-    protected static final FileFilter DIRECTORY_FILTER = new Client_FileFilterDirectories();
+public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry, Client_WidgetDirectoryEntry> implements IDirectoryNavigator {
+    protected static final FileFilter FILE_FILTER = FileFilters.FILE_FILTER_SUPPORTED;
+    protected static final FileFilter DIRECTORY_FILTER = FileFilters.FILE_FILTER_DIRECTORIES;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    protected final IDirectoryCache cache;
-    protected File currentDirectory;
+    protected ClientFile currentDirectory;
     protected final String browserContext;
     protected final IFileBrowserIconProvider iconProvider;
     @Nullable
     protected WidgetDirectoryNavigation directoryNavigationWidget;
 
-    public Client_WidgetFileBrowserBase(int x, int y, int width, int height, IDirectoryCache cache, String browserContext, File defaultDirectory, @Nullable ISelectionListener<Client_DirectoryEntry> selectionListener, IFileBrowserIconProvider iconProvider) {
+    public WidgetFileBrowserBase(int x, int y, int width, int height, String browserContext, ClientFile defaultDirectory, @Nullable ISelectionListener<Client_DirectoryEntry> selectionListener, IFileBrowserIconProvider iconProvider) {
         super(x, y, width, height, selectionListener);
-        this.cache = cache;
         this.browserContext = browserContext;
-        this.currentDirectory = this.cache.getCurrentDirectoryForContext(this.browserContext);
-        this.iconProvider = iconProvider;
         this.allowKeyboardNavigation = true;
-        if (this.currentDirectory == null) {
-            this.currentDirectory = defaultDirectory;
-        }
+        this.currentDirectory = defaultDirectory;
+        this.iconProvider = iconProvider;
 
         this.setSize(width, height);
         this.updateDirectoryNavigationWidget();
@@ -53,7 +45,10 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
             this.switchToParentDirectory();
             return true;
         } else if ((keyCode == 262 || keyCode == 257) && this.getLastSelectedEntry() != null && ((Client_DirectoryEntry)this.getLastSelectedEntry()).getType() == Client_DirectoryEntryType.DIRECTORY) {
-            this.switchToDirectory(new File(((Client_DirectoryEntry)this.getLastSelectedEntry()).getDirectory(), ((Client_DirectoryEntry)this.getLastSelectedEntry()).getName()));
+            this.switchToDirectory(
+                    this.getLastSelectedEntry().getDirectory()
+                    //new File(((Client_DirectoryEntry)this.getLastSelectedEntry()).getDirectory(), ((Client_DirectoryEntry)this.getLastSelectedEntry()).getName())
+            );
             return true;
         } else {
             return false;
@@ -93,8 +88,9 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
     }
 
     protected void refreshBrowserEntries() {
+        System.out.println("Called refreshBrowserEntries()");
         this.listContents.clear();
-        File dir = this.currentDirectory;
+        ClientFile dir = this.currentDirectory;
         if (dir.isDirectory() && dir.canRead()) {
             if (this.hasFilter()) {
                 this.addFilteredContents(dir);
@@ -106,8 +102,8 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
         this.reCreateListEntryWidgets();
     }
 
-    protected void addNonFilteredContents(File dir) {
-        List<Client_DirectoryEntry> list = new ArrayList();
+    protected void addNonFilteredContents(ClientFile dir) {
+        List<Client_DirectoryEntry> list = new ArrayList<>();
         this.addMatchingEntriesToList(this.getDirectoryFilter(), dir, list, (String)null, (String)null);
         Collections.sort(list);
         this.listContents.addAll(list);
@@ -117,23 +113,22 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
         this.listContents.addAll(list);
     }
 
-    protected void addFilteredContents(File dir) {
+    protected void addFilteredContents(ClientFile dir) {
         String filterText = this.widgetSearchBar.getFilter();
-        List<Client_DirectoryEntry> list = new ArrayList();
+        List<Client_DirectoryEntry> list = new ArrayList<>();
         this.addFilteredContents(dir, filterText, list, (String)null);
         this.listContents.addAll(list);
     }
 
-    protected void addFilteredContents(File dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
-        List<Client_DirectoryEntry> list = new ArrayList();
+    protected void addFilteredContents(ClientFile dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
+        System.out.println("Called addFilteredContents()");
+        List<Client_DirectoryEntry> list = new ArrayList<>();
         this.addMatchingEntriesToList(this.getDirectoryFilter(), dir, list, filterText, prefix);
         Collections.sort(list);
         listOut.addAll(list);
         list.clear();
-        Iterator var6 = this.getSubDirectories(dir).iterator();
 
-        while(var6.hasNext()) {
-            File subDir = (File)var6.next();
+        for (ClientFile subDir : this.getSubDirectories(dir)) {
             String pre;
             if (prefix != null) {
                 pre = prefix + subDir.getName() + "/";
@@ -152,12 +147,14 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
         listOut.addAll(list);
     }
 
-    protected void addMatchingEntriesToList(FileFilter filter, File dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
-        File[] var6 = dir.listFiles(filter);
+    protected void addMatchingEntriesToList(FileFilter filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
+
+        System.out.println("Called addMatchingEntriesToList()");
+        ClientFile[] var6 = dir.listFiles(filter);
         int var7 = var6.length;
 
         for(int var8 = 0; var8 < var7; ++var8) {
-            File file = var6[var8];
+            ClientFile file = var6[var8];
             String name = FileUtils.getNameWithoutExtension(file.getName().toLowerCase());
             if (filterText == null || this.matchesFilter(name, filterText)) {
                 list.add(new Client_DirectoryEntry(Client_DirectoryEntryType.fromFile(file), dir, file.getName(), displayNamePrefix));
@@ -166,22 +163,22 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
 
     }
 
-    protected List<File> getSubDirectories(File dir) {
-        List<File> dirs = new ArrayList();
-        File[] var3 = dir.listFiles(DIRECTORY_FILTER);
+    protected List<ClientFile> getSubDirectories(ClientFile dir) {
+        System.out.println("Called getSubDirectories()");
+        List<ClientFile> dirs = new ArrayList<>();
+        ClientFile[] var3 = dir.listFiles(DIRECTORY_FILTER);
         int var4 = var3.length;
 
         for(int var5 = 0; var5 < var4; ++var5) {
-            File file = var3[var5];
+            ClientFile file = var3[var5];
             dirs.add(file);
         }
 
         return dirs;
     }
 
-    protected File getRootDirectory() {
-        //TODO
-        return DataManager.getRootDirectory();
+    protected ClientFile getRootDirectory() {
+        return DataManager.getDatapackBaseDirectory();
     }
 
     protected FileFilter getDirectoryFilter() {
@@ -196,14 +193,13 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
         return this.currentDirectory.equals(getRootDirectory());
     }
 
-    public File getCurrentDirectory() {
+    public ClientFile getCurrentDirectory() {
         return this.currentDirectory;
     }
 
-    public void switchToDirectory(File dir) {
+    public void switchToDirectory(ClientFile dir) {
         this.clearSelection();
         this.currentDirectory = FileUtils.getCanonicalFileIfPossible(dir);
-        this.cache.setCurrentDirectoryForContext(this.browserContext, dir);
         this.refreshEntries();
         this.resetScrollbarPosition();
     }
@@ -213,7 +209,7 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
     }
 
     public void switchToParentDirectory() {
-        File parent = this.currentDirectory.getParentFile();
+        ClientFile parent = this.currentDirectory.getParentFile();
         if (!this.currentDirectoryIsRoot() && parent != null && this.currentDirectory.getAbsolutePath().contains(this.getRootDirectory().getAbsolutePath())) {
             this.switchToDirectory(parent);
         } else {
@@ -223,12 +219,12 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
     }
     public static class Client_DirectoryEntry  implements Comparable<Client_DirectoryEntry> {
         private final Client_DirectoryEntryType type;
-        private final File dir;
+        private final ClientFile dir;
         private final String name;
         @Nullable
         private final String displaynamePrefix;
 
-        public Client_DirectoryEntry(Client_DirectoryEntryType type, File dir, String name, @Nullable String displaynamePrefix) {
+        public Client_DirectoryEntry(Client_DirectoryEntryType type, ClientFile dir, String name, @Nullable String displaynamePrefix) {
             this.type = type;
             this.dir = dir;
             this.name = name;
@@ -239,7 +235,7 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
             return this.type;
         }
 
-        public File getDirectory() {
+        public ClientFile getDirectory() {
             return this.dir;
         }
 
@@ -256,10 +252,6 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
             return this.displaynamePrefix != null ? this.displaynamePrefix + this.name : this.name;
         }
 
-        public File getFullPath() {
-            return new File(this.dir, this.name);
-        }
-
         public int compareTo(Client_DirectoryEntry other) {
             return this.name.toLowerCase(Locale.US).compareTo(other.getName().toLowerCase(Locale.US));
         }
@@ -273,21 +265,13 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
         private Client_DirectoryEntryType() {
         }
 
-        public static Client_DirectoryEntryType fromFile(File file) {
+        public static Client_DirectoryEntryType fromFile(ClientFile file) {
+            System.out.println("Called Client_DirectoryEntryType_fromFile()");
             if (!file.exists()) {
                 return INVALID;
             } else {
                 return file.isDirectory() ? DIRECTORY : FILE;
             }
-        }
-    }
-
-    public static class Client_FileFilterDirectories implements FileFilter {
-        public Client_FileFilterDirectories() {
-        }
-
-        public boolean accept(File pathName) {
-            return pathName.isDirectory() && !pathName.getName().startsWith(".");
         }
     }
     public static class Client_WidgetDirectoryEntry extends WidgetListEntryBase<Client_DirectoryEntry> {
@@ -310,7 +294,9 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
 
         protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton) {
             if (this.entry.getType() == Client_DirectoryEntryType.DIRECTORY) {
-                this.navigator.switchToDirectory(new File(this.entry.getDirectory(), this.entry.getName()));
+                //TODO  - this.entry.getDirectory(), this.entry.getName()
+
+                this.navigator.switchToDirectory(this.entry.getDirectory());
                 return true;
             } else {
                 return super.onMouseClickedImpl(mouseX, mouseY, mouseButton);
@@ -329,9 +315,10 @@ public class Client_WidgetFileBrowserBase extends WidgetListBase<Client_Director
             }
 
             IGuiIcon icon = null;
-            switch (this.entry.getType()) {
-                case DIRECTORY -> icon = this.iconProvider.getIconDirectory();
-                default -> icon = this.iconProvider.getIconForFile(this.entry.getFullPath());
+            if (Objects.requireNonNull(this.entry.getType()) == Client_DirectoryEntryType.DIRECTORY) {
+                icon = this.iconProvider.getIconDirectory();
+            } else {
+                icon = this.iconProvider.getIconForFileType(FileType.fromString(this.entry.getName()));
             }
 
             int iconWidth = icon != null ? icon.getWidth() : 0;

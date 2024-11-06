@@ -1,4 +1,4 @@
-package net.mat0u5.functioneditor.utils;
+package net.mat0u5.functioneditor.files;
 
 import fi.dy.masa.malilib.gui.interfaces.IDirectoryCache;
 
@@ -9,8 +9,11 @@ public class DataManager implements IDirectoryCache {
     public static File getRootDirectory() {
         return new File(".");
     }
-    public static File getSchematicsBaseDirectory() {
-        return getRootDirectory();
+    public static ClientFile getClientRootDirectory() {
+        return new ClientFile(".");
+    }
+    public static ClientFile getDatapackBaseDirectory() {
+        return getClientRootDirectory();
     }
     public static IDirectoryCache getDirectoryCache() {
         return INSTANCE;

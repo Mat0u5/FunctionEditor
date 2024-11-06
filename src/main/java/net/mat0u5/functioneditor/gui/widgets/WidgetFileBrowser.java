@@ -1,44 +1,31 @@
 package net.mat0u5.functioneditor.gui.widgets;
 
-import java.io.File;
 import java.io.FileFilter;
-import java.util.HashMap;
-import java.util.Map;
 
-import net.mat0u5.functioneditor.Main;
-import net.mat0u5.functioneditor.gui.FileEditorFilter;
+import net.mat0u5.functioneditor.files.ClientFile;
+import net.mat0u5.functioneditor.files.FileFilters;
 import net.mat0u5.functioneditor.gui.GuiFileBrowser;
 import net.mat0u5.functioneditor.gui.Icons;
-import net.mat0u5.functioneditor.utils.DataManager;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import net.mat0u5.functioneditor.files.DataManager;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.util.Identifier;
 
 import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
-import fi.dy.masa.malilib.gui.widgets.WidgetFileBrowserBase;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_DirectoryEntry;
-import net.mat0u5.functioneditor.gui.widgets.Client_WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
 import fi.dy.masa.malilib.render.RenderUtils;
 import fi.dy.masa.malilib.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
-public class WidgetSchematicBrowser extends Client_WidgetFileBrowserBase
+public class WidgetFileBrowser extends WidgetFileBrowserBase
 {
-    protected static final FileFilter FILE_FILTER = new FileEditorFilter();
+    protected static final FileFilter FILE_FILTER = FileFilters.FILE_FILTER_SUPPORTED;
 
-    //protected final Map<File, SchematicMetadata> cachedMetadata = new HashMap<>();
-    protected final Map<File, Pair<Identifier, NativeImageBackedTexture>> cachedPreviewImages = new HashMap<>();
     protected final GuiFileBrowser parent;
     protected final int infoWidth;
     protected final int infoHeight;
 
-    public WidgetSchematicBrowser(int x, int y, int width, int height, GuiFileBrowser parent, @Nullable ISelectionListener<Client_DirectoryEntry> selectionListener)
+    public WidgetFileBrowser(int x, int y, int width, int height, GuiFileBrowser parent, @Nullable ISelectionListener<Client_DirectoryEntry> selectionListener)
     {
-        super(x, y, width, height, DataManager.getDirectoryCache(), parent.getBrowserContext(),
+        super(x, y, width, height, parent.getBrowserContext(),
                 parent.getDefaultDirectory(), selectionListener, Icons.FILE_ICON_LITEMATIC);
 
         this.title = StringUtils.translate("litematica.gui.title.schematic_browser");
@@ -57,14 +44,12 @@ public class WidgetSchematicBrowser extends Client_WidgetFileBrowserBase
     public void close()
     {
         super.close();
-
-        this.clearPreviewImages();
     }
 
     @Override
-    protected File getRootDirectory()
+    protected ClientFile getRootDirectory()
     {
-        return DataManager.getSchematicsBaseDirectory();
+        return DataManager.getDatapackBaseDirectory();
     }
 
     protected FileFilter getFileFilter()
@@ -187,85 +172,5 @@ public class WidgetSchematicBrowser extends Client_WidgetFileBrowserBase
             }
         }*/
     }
-
-    public void clearSchematicMetadataCache()
-    {
-        this.clearPreviewImages();
-        //this.cachedMetadata.clear();
-        this.cachedPreviewImages.clear();
-    }
-/*
-    @Nullable
-    protected SchematicMetadata getSchematicMetadata(DirectoryEntry entry)
-    {
-        File file = new File(entry.getDirectory(), entry.getName());
-        SchematicMetadata meta = this.cachedMetadata.get(file);
-
-        if (meta == null && this.cachedMetadata.containsKey(file) == false)
-        {
-            if (entry.getName().endsWith(LitematicaSchematic.FILE_EXTENSION))
-            {
-                meta = LitematicaSchematic.readMetadataFromFile(entry.getDirectory(), entry.getName());
-
-                if (meta != null)
-                {
-                    this.createPreviewImage(file, meta);
-                }
-            }
-
-            this.cachedMetadata.put(file, meta);
-        }
-
-        return meta;
-    }*/
-
-    private void clearPreviewImages()
-    {
-        for (Pair<Identifier, NativeImageBackedTexture> pair : this.cachedPreviewImages.values())
-        {
-            this.mc.getTextureManager().destroyTexture(pair.getLeft());
-        }
-    }
-
-    private void createPreviewImage(File file)//, SchematicMetadata meta
-    {
-        int[] previewImageData =  null; //meta.getPreviewImagePixelData()
-
-        if (previewImageData != null && previewImageData.length > 0)
-        {
-            int size = (int) Math.sqrt(previewImageData.length);
-
-            if ((size * size) == previewImageData.length)
-            {
-                try
-                {
-                    NativeImage image = new NativeImage(size, size, false);
-                    NativeImageBackedTexture tex = new NativeImageBackedTexture(image);
-                    Identifier rl = Identifier.of(Main.MOD_ID, DigestUtils.sha1Hex(file.getAbsolutePath()));
-                    this.mc.getTextureManager().registerTexture(rl, tex);
-
-                    for (int y = 0, i = 0; y < size; ++y)
-                    {
-                        for (int x = 0; x < size; ++x)
-                        {
-                            int val = previewImageData[i++];
-                            // Swap the color channels from ARGB to ABGR
-                            val = (val & 0xFF00FF00) | (val & 0xFF0000) >> 16 | (val & 0xFF) << 16;
-                            image.setColor(x, y, val);
-                        }
-                    }
-
-                    tex.upload();
-
-                    this.cachedPreviewImages.put(file, Pair.of(rl, tex));
-                }
-                catch (Exception e)
-                {
-                    Main.LOGGER.warn("Failed to create a preview image", e);
-                }
-            }
-        }
-    }
-
 }
 
