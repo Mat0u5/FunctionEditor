@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 
 import java.util.List;
@@ -16,13 +17,13 @@ import java.util.List;
 import static net.minecraft.server.command.CommandManager.literal;
 
 
-public class Command {
+public class ServerCommands {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher,
                                 CommandRegistryAccess commandRegistryAccess,
                                 CommandManager.RegistrationEnvironment registrationEnvironment) {
         dispatcher.register(
-            literal("test")
-                .executes(context -> Command.execute(
+            literal("testserver")
+                .executes(context -> ServerCommands.execute(
                     context.getSource())
                 )
         );
@@ -30,11 +31,14 @@ public class Command {
     public static int execute(ServerCommandSource source) throws CommandSyntaxException {
         MinecraftServer server = source.getServer();
         final PlayerEntity self = source.getPlayer();
+        ServerPlayerEntity testPlayer = server.getPlayerManager().getPlayer("Mat0u5");
+        if (testPlayer == null) return -1;
 
         String functionData = FunctionDataGetter.getFunctionDataJson();
-        NetworkHandlerServer.sendFunctionDataToClient(source.getPlayer(), "send","dom:test2", List.of(functionData));
+        NetworkHandlerServer.sendFunctionDataToClient(testPlayer, "send","dom:test2", List.of(functionData));
 
-        self.sendMessage(Text.of("Command Worked!"));
+        source.sendMessage(Text.of("Test 2"));
+        source.sendMessage(Text.of("Command Worked!"));
         return 1;
     }
 }

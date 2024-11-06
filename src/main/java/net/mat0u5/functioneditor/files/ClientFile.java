@@ -5,8 +5,8 @@ import java.io.FileFilter;
 import java.io.IOException;
 
 public class ClientFile {
-    public String path;
-    public File tempFile;
+    private String path;
+    private File tempFile;
 
     public ClientFile(String path) {
         this.path = path;
@@ -21,12 +21,9 @@ public class ClientFile {
         if (file == null) return;
         this.path = file.getPath();
     }
+
     public boolean isNull() {
         return tempFile == null;
-    }
-
-    public ClientFile getParentFile() {
-        return new ClientFile(tempFile.getParentFile());
     }
     public String getAbsolutePath() {
         return tempFile.getAbsolutePath();
@@ -45,6 +42,10 @@ public class ClientFile {
     }
     public boolean isDirectory() {
         return tempFile.isDirectory();
+    }
+
+    public ClientFile getParentFile() {
+        return new ClientFile(tempFile.getParentFile());
     }
     public ClientFile getCanonicalFile() throws IOException {
         return new ClientFile(tempFile.getCanonicalFile());

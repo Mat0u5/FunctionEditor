@@ -2,7 +2,6 @@ package net.mat0u5.functioneditor.network;
 
 import fi.dy.masa.malilib.gui.GuiBase;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.mat0u5.functioneditor.gui.GuiFileBrowser;
 import net.minecraft.client.MinecraftClient;
 
@@ -11,8 +10,8 @@ import java.util.List;
 public class NetworkHandlerClient {
 
     public static void registerPackets() {
-        PayloadTypeRegistry.playS2C().register(FunctionDataPayload.ID, FunctionDataPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(FunctionDataPayload.ID, FunctionDataPayload.CODEC);
+        //Register the same packets as the server
+        //NetworkHandlerServer.registerPackets();
     }
     public static void registerClientReceiver() {
         ClientPlayNetworking.registerGlobalReceiver(FunctionDataPayload.ID, (payload, context) -> {

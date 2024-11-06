@@ -9,11 +9,11 @@ import net.minecraft.util.Identifier;
 
 import java.util.List;
 
-public record FunctionDataPayload(String sendInfo, String function, List<String> lines) implements CustomPayload {
+public record FunctionDataPayload(String packetInfo, String function, List<String> lines) implements CustomPayload {
 
     public static final CustomPayload.Id<FunctionDataPayload> ID = new CustomPayload.Id<>(Identifier.of(Main.MOD_ID, "function_data"));
     public static final PacketCodec<RegistryByteBuf, FunctionDataPayload> CODEC = PacketCodec.tuple(
-            PacketCodecs.STRING, FunctionDataPayload::sendInfo,
+            PacketCodecs.STRING, FunctionDataPayload::packetInfo,
             PacketCodecs.STRING, FunctionDataPayload::function,
             PacketCodecs.STRING.collect(PacketCodecs.toList()), FunctionDataPayload::lines,
             FunctionDataPayload::new

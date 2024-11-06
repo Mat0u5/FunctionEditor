@@ -3,7 +3,7 @@ package net.mat0u5.functioneditor;
 import net.fabricmc.api.ModInitializer;
 
 import net.mat0u5.functioneditor.config.ConfigManager;
-import net.mat0u5.functioneditor.utils.ModRegistries;
+import net.mat0u5.functioneditor.utils.ModRegistriesServer;
 import net.mat0u5.functioneditor.network.NetworkHandlerServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +17,7 @@ public class Main implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("[SERVER] Initializing Function Editor...");
-		ModRegistries.registerModStuff();
+		ModRegistriesServer.registerModStuff();
 		NetworkHandlerServer.registerPackets();
 		NetworkHandlerServer.registerServerReceiver();
 	}
