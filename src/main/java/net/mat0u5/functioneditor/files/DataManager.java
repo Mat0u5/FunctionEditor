@@ -7,10 +7,15 @@ import java.io.File;
 public class DataManager implements IDirectoryCache {
     private static final DataManager INSTANCE = new DataManager();
     public static File getRootDirectory() {
-        return new File(".");
+        try {
+            File file = new File(".").getCanonicalFile();
+            return file;
+        }catch(Exception e) {
+            return new File(".");
+        }
     }
     public static ClientFile getClientRootDirectory() {
-        return new ClientFile(".");
+        return new ClientFile(getRootDirectory());
     }
     public static ClientFile getDatapackBaseDirectory() {
         return getClientRootDirectory();

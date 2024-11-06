@@ -2,7 +2,7 @@ package net.mat0u5.functioneditor.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.mat0u5.functioneditor.network.NetworkHandler;
+import net.mat0u5.functioneditor.network.NetworkHandlerServer;
 import net.mat0u5.functioneditor.utils.FunctionDataGetter;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,7 +32,7 @@ public class Command {
         final PlayerEntity self = source.getPlayer();
 
         String functionData = FunctionDataGetter.getFunctionDataJson();
-        NetworkHandler.sendFunctionDataToClient(source.getPlayer(), "send","dom:test2", List.of(functionData));
+        NetworkHandlerServer.sendFunctionDataToClient(source.getPlayer(), "send","dom:test2", List.of(functionData));
 
         self.sendMessage(Text.of("Command Worked!"));
         return 1;

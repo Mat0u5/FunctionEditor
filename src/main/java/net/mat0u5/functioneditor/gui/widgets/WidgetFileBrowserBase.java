@@ -5,6 +5,8 @@ import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import fi.dy.masa.malilib.gui.widgets.WidgetListBase;
 import fi.dy.masa.malilib.gui.widgets.WidgetListEntryBase;
 import fi.dy.masa.malilib.render.RenderUtils;
+
+import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -88,7 +90,6 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     }
 
     protected void refreshBrowserEntries() {
-        System.out.println("Called refreshBrowserEntries()");
         this.listContents.clear();
         ClientFile dir = this.currentDirectory;
         if (dir.isDirectory() && dir.canRead()) {
@@ -121,7 +122,6 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     }
 
     protected void addFilteredContents(ClientFile dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
-        System.out.println("Called addFilteredContents()");
         List<Client_DirectoryEntry> list = new ArrayList<>();
         this.addMatchingEntriesToList(this.getDirectoryFilter(), dir, list, filterText, prefix);
         Collections.sort(list);
@@ -148,8 +148,6 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     }
 
     protected void addMatchingEntriesToList(FileFilter filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
-
-        System.out.println("Called addMatchingEntriesToList()");
         ClientFile[] var6 = dir.listFiles(filter);
         int var7 = var6.length;
 
@@ -164,7 +162,6 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     }
 
     protected List<ClientFile> getSubDirectories(ClientFile dir) {
-        System.out.println("Called getSubDirectories()");
         List<ClientFile> dirs = new ArrayList<>();
         ClientFile[] var3 = dir.listFiles(DIRECTORY_FILTER);
         int var4 = var3.length;
@@ -215,7 +212,6 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         } else {
             this.switchToRootDirectory();
         }
-
     }
     public static class Client_DirectoryEntry  implements Comparable<Client_DirectoryEntry> {
         private final Client_DirectoryEntryType type;
@@ -266,7 +262,6 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         }
 
         public static Client_DirectoryEntryType fromFile(ClientFile file) {
-            System.out.println("Called Client_DirectoryEntryType_fromFile()");
             if (!file.exists()) {
                 return INVALID;
             } else {
@@ -294,9 +289,7 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
 
         protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton) {
             if (this.entry.getType() == Client_DirectoryEntryType.DIRECTORY) {
-                //TODO  - this.entry.getDirectory(), this.entry.getName()
-
-                this.navigator.switchToDirectory(this.entry.getDirectory());
+                this.navigator.switchToDirectory(new ClientFile(this.entry.getDirectory(),this.entry.getName()));
                 return true;
             } else {
                 return super.onMouseClickedImpl(mouseX, mouseY, mouseButton);

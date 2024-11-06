@@ -9,7 +9,7 @@ public class FileUtils {
         if (maxStringLength <= 0) {
             return "...";
         } else {
-            while(file != null) {
+            while(file != null && !file.isNull()) {
                 String name = file.getName();
                 if (!path.isEmpty()) {
                     path = name + separator + path;

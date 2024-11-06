@@ -3,27 +3,32 @@ package net.mat0u5.functioneditor.files;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 public class ClientFile {
-    public static String path;
-    public static File tempFile;
+    public String path;
+    public File tempFile;
 
     public ClientFile(String path) {
         this.path = path;
+        tempFile = new File(path).getAbsoluteFile();
+    }
+    public ClientFile(ClientFile dir, String file) {
+        this.path = dir.getAbsolutePath()+"\\"+file;
         tempFile = new File(path);
     }
     public ClientFile(File file) {
+        tempFile = file;
         if (file == null) return;
         this.path = file.getPath();
-        tempFile = file;
+    }
+    public boolean isNull() {
+        return tempFile == null;
     }
 
     public ClientFile getParentFile() {
         return new ClientFile(tempFile.getParentFile());
     }
     public String getAbsolutePath() {
-        //return path;
         return tempFile.getAbsolutePath();
     }
     public String getName() {
