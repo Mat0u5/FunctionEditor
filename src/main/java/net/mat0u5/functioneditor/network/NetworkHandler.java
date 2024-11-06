@@ -1,9 +1,11 @@
 package net.mat0u5.functioneditor.network;
 
+import fi.dy.masa.malilib.gui.GuiBase;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.mat0u5.functioneditor.gui.FunctionEditScreen;
+import net.mat0u5.functioneditor.gui.GuiFileBrowser;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -22,7 +24,8 @@ public class NetworkHandler {
             MinecraftClient client = context.client();
             client.execute(() -> {
                 System.out.println("Client received custom packet: " + payload.lines().toString());
-                client.setScreen(new FunctionEditScreen(payload.sendInfo(), payload.function(), payload.lines()));
+                //client.setScreen(new FunctionEditScreen(payload.sendInfo(), payload.function(), payload.lines()));
+                GuiBase.openGui(new GuiFileBrowser());
             });
         });
     }
