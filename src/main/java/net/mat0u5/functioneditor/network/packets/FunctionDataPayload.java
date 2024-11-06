@@ -1,4 +1,4 @@
-package net.mat0u5.functioneditor.network;
+package net.mat0u5.functioneditor.network.packets;
 
 import net.mat0u5.functioneditor.Main;
 import net.minecraft.network.RegistryByteBuf;

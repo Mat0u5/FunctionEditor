@@ -31,7 +31,7 @@ public class ServerCommands {
     public static int execute(ServerCommandSource source) throws CommandSyntaxException {
         MinecraftServer server = source.getServer();
         final PlayerEntity self = source.getPlayer();
-        ServerPlayerEntity testPlayer = server.getPlayerManager().getPlayer("Mat0u5");
+        ServerPlayerEntity testPlayer = server.getPlayerManager().getPlayerList().get(0);
         if (testPlayer == null) return -1;
 
         String functionData = FunctionDataGetter.getFunctionDataJson();

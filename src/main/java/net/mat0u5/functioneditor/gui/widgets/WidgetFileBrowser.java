@@ -3,10 +3,10 @@ package net.mat0u5.functioneditor.gui.widgets;
 import java.io.FileFilter;
 
 import net.mat0u5.functioneditor.files.ClientFile;
+import net.mat0u5.functioneditor.files.DataManagerClient;
 import net.mat0u5.functioneditor.files.FileFilters;
 import net.mat0u5.functioneditor.gui.GuiFileBrowser;
 import net.mat0u5.functioneditor.gui.Icons;
-import net.mat0u5.functioneditor.files.DataManager;
 
 import net.minecraft.client.gui.DrawContext;
 
@@ -49,7 +49,7 @@ public class WidgetFileBrowser extends WidgetFileBrowserBase
     @Override
     protected ClientFile getRootDirectory()
     {
-        return DataManager.getDatapackBaseDirectory();
+        return DataManagerClient.getDatapackBaseDirectory();
     }
 
     protected FileFilter getFileFilter()

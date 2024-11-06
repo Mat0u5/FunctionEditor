@@ -11,7 +11,6 @@ public class MainClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     @Override
     public void onInitializeClient() {
-        //config = new ConfigManager("./config/"+MOD_ID+".properties");
         LOGGER.info("[CLIENT] Initializing Function Editor...");
         ModRegistriesClient.registerModStuff();
         NetworkHandlerClient.registerClientReceiver();

@@ -4,8 +4,8 @@ import fi.dy.masa.malilib.gui.interfaces.IDirectoryCache;
 
 import java.io.File;
 
-public class DataManager implements IDirectoryCache {
-    private static final DataManager INSTANCE = new DataManager();
+public class DataManagerServer implements IDirectoryCache {
+    private static final DataManagerServer INSTANCE = new DataManagerServer();
     public static File getRootDirectory() {
         try {
             File file = new File(".").getCanonicalFile();
@@ -13,12 +13,6 @@ public class DataManager implements IDirectoryCache {
         }catch(Exception e) {
             return new File(".");
         }
-    }
-    public static ClientFile getClientRootDirectory() {
-        return new ClientFile(getRootDirectory());
-    }
-    public static ClientFile getDatapackBaseDirectory() {
-        return getClientRootDirectory();
     }
     public static IDirectoryCache getDirectoryCache() {
         return INSTANCE;

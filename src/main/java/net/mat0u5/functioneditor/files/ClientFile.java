@@ -1,12 +1,22 @@
 package net.mat0u5.functioneditor.files;
 
+import net.mat0u5.functioneditor.network.packets.FileDataPayload;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.List;
 
 public class ClientFile {
-    private String path;
     private File tempFile;
+
+    private String path;
+    private String name;
+    private boolean canRead;
+    private boolean isFile;
+    private boolean exists;
+    private boolean isDirectory;
+    private boolean isNull;
 
     public ClientFile(String path) {
         this.path = path;
@@ -16,32 +26,50 @@ public class ClientFile {
         this.path = dir.getAbsolutePath()+"\\"+file;
         tempFile = new File(path);
     }
+    public ClientFile(FileDataPayload fileDataPayload) {
+        this.isNull = fileDataPayload == null;
+        if (isNull) return;
+        this.path = fileDataPayload.path();
+        List<Boolean> boolList = fileDataPayload.fileInfo();
+        this.name = fileDataPayload.name();
+        this.canRead = boolList.get(0);
+        this.isFile = boolList.get(1);
+        this.exists = boolList.get(2);
+        this.isDirectory = boolList.get(3);
+    }
     public ClientFile(File file) {
+        //TODO - Remove
         tempFile = file;
-        if (file == null) return;
+        this.isNull = file == null;
+        if (isNull) return;
         this.path = file.getPath();
+        this.name = file.getName();
+        this.canRead = file.canRead();
+        this.isFile = file.isFile();
+        this.exists = file.exists();
+        this.isDirectory = file.isDirectory();
     }
 
     public boolean isNull() {
-        return tempFile == null;
+        return isNull;
     }
     public String getAbsolutePath() {
-        return tempFile.getAbsolutePath();
+        return path;
     }
     public String getName() {
-        return tempFile.getName();
+        return name;
     }
     public boolean canRead() {
-        return tempFile.canRead();
+        return canRead;
     }
     public boolean isFile() {
-        return tempFile.isFile();
+        return isFile;
     }
     public boolean exists() {
-        return tempFile.exists();
+        return exists;
     }
     public boolean isDirectory() {
-        return tempFile.isDirectory();
+        return isDirectory;
     }
 
     public ClientFile getParentFile() {

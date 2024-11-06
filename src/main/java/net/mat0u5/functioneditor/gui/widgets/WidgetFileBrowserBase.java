@@ -6,7 +6,6 @@ import fi.dy.masa.malilib.gui.widgets.WidgetListBase;
 import fi.dy.masa.malilib.gui.widgets.WidgetListEntryBase;
 import fi.dy.masa.malilib.render.RenderUtils;
 
-import java.io.File;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -175,7 +174,7 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     }
 
     protected ClientFile getRootDirectory() {
-        return DataManager.getDatapackBaseDirectory();
+        return DataManagerClient.getDatapackBaseDirectory();
     }
 
     protected FileFilter getDirectoryFilter() {

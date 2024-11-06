@@ -25,8 +25,9 @@ public class Events {
     static void onPlayerJoin(MinecraftServer server, ServerPlayerEntity player) {
         try {
             if (player.hasPermissionLevel(2)) {
-                String functionData = FunctionDataGetter.getFunctionDataJson();
-                NetworkHandlerServer.sendFunctionDataToClient(player, "send","dom:test", List.of(functionData));
+                /*String functionData = FunctionDataGetter.getFunctionDataJson();
+                NetworkHandlerServer.sendFunctionDataToClient(player, "send","dom:test", List.of(functionData));*/
+
             }
         }catch (Exception e) {}
     }

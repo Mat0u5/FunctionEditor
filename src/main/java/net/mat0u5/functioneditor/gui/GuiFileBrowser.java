@@ -9,7 +9,7 @@ import fi.dy.masa.malilib.gui.interfaces.ISelectionListener;
 import fi.dy.masa.malilib.gui.widgets.*;
 import fi.dy.masa.malilib.util.StringUtils;
 import net.mat0u5.functioneditor.files.ClientFile;
-import net.mat0u5.functioneditor.files.DataManager;
+import net.mat0u5.functioneditor.files.DataManagerClient;
 import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowser;
 import net.minecraft.client.gui.screen.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -62,7 +62,7 @@ public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_Wi
 
     public ClientFile getDefaultDirectory()
     {
-        return DataManager.getDatapackBaseDirectory();
+        return DataManagerClient.getDatapackBaseDirectory();
     }
 
 
