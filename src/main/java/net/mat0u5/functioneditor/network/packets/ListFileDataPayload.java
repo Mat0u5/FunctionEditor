@@ -7,6 +7,8 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public record ListFileDataPayload(String packetInfo, List<FileDataPayload> files) implements CustomPayload {
@@ -21,5 +23,18 @@ public record ListFileDataPayload(String packetInfo, List<FileDataPayload> files
     @Override
     public CustomPayload.Id<? extends CustomPayload> getId() {
         return ID;
+    }
+
+    public static ListFileDataPayload getFromFiles(String requestInfo, File[] files) {
+        List<FileDataPayload> listFilePayload = new ArrayList<>();
+        for (File file : files) {
+            try {
+                file = file.getCanonicalFile();
+            } catch (Exception e){}
+            FileDataPayload fileDataPayload = FileDataPayload.getFromFile(requestInfo, file);
+            listFilePayload.add(fileDataPayload);
+        }
+
+        return new ListFileDataPayload(requestInfo, listFilePayload);
     }
 }

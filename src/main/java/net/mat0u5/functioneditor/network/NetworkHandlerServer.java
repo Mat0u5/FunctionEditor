@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.mat0u5.functioneditor.Main;
 import net.mat0u5.functioneditor.files.DataManagerServer;
+import net.mat0u5.functioneditor.files.FileFilters;
 import net.mat0u5.functioneditor.network.packets.FileDataPayload;
 import net.mat0u5.functioneditor.network.packets.FunctionDataPayload;
 import net.mat0u5.functioneditor.network.packets.ListFileDataPayload;
@@ -12,6 +13,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NetworkHandlerServer {
@@ -51,23 +54,34 @@ public class NetworkHandlerServer {
     public static void handlePacketRequest(ServerPlayerEntity player, RequestDataPayload payload) {
         String requestInfo = payload.requestInfo();
         String additionalInfo = payload.additionalInfo();
-        if (requestInfo.equalsIgnoreCase("file_data")) {
+        if (requestInfo.equalsIgnoreCase("file_data") ||
+            requestInfo.equalsIgnoreCase("file_data_getparent")) {
             String filePath = additionalInfo;
             File file = new File(filePath);
             if (additionalInfo.equalsIgnoreCase("root")) {
                 file = DataManagerServer.getRootDirectory();
             }
             else {
+                if (requestInfo.equalsIgnoreCase("file_data_getparent")) {
+                    file = file.getParentFile();
+                }
                 try {
                     file = file.getCanonicalFile();
                 } catch (Exception e){}
             }
-            FileDataPayload fileDataPayload = new FileDataPayload(
-                    "file_data",
-                    file.getPath(),file.getName(),
-                    List.of(file.canRead(), file.isFile(), file.exists(), file.isDirectory())
-                    );
+            FileDataPayload fileDataPayload = FileDataPayload.getFromFile(requestInfo, file);
             ServerPlayNetworking.send(player, fileDataPayload);
+        }
+        else if (requestInfo.equalsIgnoreCase("file_list_dir") ||
+                requestInfo.equalsIgnoreCase("file_list_files")) {
+            FileFilter filter = requestInfo.equalsIgnoreCase("file_list_dir") ? FileFilters.FILE_FILTER_DIRECTORIES : FileFilters.FILE_FILTER_SUPPORTED;
+            String filePath = additionalInfo;
+            File mainFile = new File(filePath);
+            File[] files = mainFile.listFiles(filter);
+
+            if (files == null) return;
+            ListFileDataPayload listFileDataPayload = ListFileDataPayload.getFromFiles(requestInfo,files);
+            ServerPlayNetworking.send(player, listFileDataPayload);
         }
     }
 }

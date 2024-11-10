@@ -2,6 +2,7 @@ package net.mat0u5.functioneditor.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class FileUtils {
     public static String getJoinedTrailingPathElements(ClientFile file, ClientFile rootPath, int maxStringLength, String separator) {
@@ -9,7 +10,7 @@ public class FileUtils {
         if (maxStringLength <= 0) {
             return "...";
         } else {
-            while(file != null && !file.isNull()) {
+            /*while(file != null && !file.isNull()) {
                 String name = file.getName();
                 if (!path.isEmpty()) {
                     path = name + separator + path;
@@ -27,11 +28,10 @@ public class FileUtils {
                 if (file.equals(rootPath)) {
                     break;
                 }
+                file = file.getParent();
+            }*/
 
-                file = file.getParentFile();
-            }
-
-            return path;
+            return file.getAbsolutePath().replaceFirst(rootPath.getAbsolutePath(),"");
         }
     }
 
@@ -41,7 +41,7 @@ public class FileUtils {
             if (fileCan != null) {
                 file = fileCan;
             }
-        } catch (IOException var2) {
+        } catch (Exception var2) {
         }
 
         return file;

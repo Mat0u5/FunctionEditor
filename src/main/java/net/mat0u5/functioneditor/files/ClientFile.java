@@ -1,11 +1,15 @@
 package net.mat0u5.functioneditor.files;
 
+import fi.dy.masa.malilib.gui.GuiBase;
+import net.mat0u5.functioneditor.gui.GuiFileBrowser;
+import net.mat0u5.functioneditor.network.NetworkHandlerClient;
 import net.mat0u5.functioneditor.network.packets.FileDataPayload;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class ClientFile {
     private File tempFile;
@@ -36,7 +40,10 @@ public class ClientFile {
         this.isFile = boolList.get(1);
         this.exists = boolList.get(2);
         this.isDirectory = boolList.get(3);
+        //TEMP
+        //tempFile = new File(this.path);
     }
+    /*
     public ClientFile(File file) {
         //TODO - Remove
         tempFile = file;
@@ -48,7 +55,7 @@ public class ClientFile {
         this.isFile = file.isFile();
         this.exists = file.exists();
         this.isDirectory = file.isDirectory();
-    }
+    }*/
 
     public boolean isNull() {
         return isNull;
@@ -71,19 +78,25 @@ public class ClientFile {
     public boolean isDirectory() {
         return isDirectory;
     }
-
-    public ClientFile getParentFile() {
-        return new ClientFile(tempFile.getParentFile());
+    public CompletableFuture<ClientFile> getParentFile() {
+        //return new ClientFile(tempFile.getParentFile());
+        return NetworkHandlerClient.requestServerFileAsync("file_data_getparent",path);
     }
-    public ClientFile getCanonicalFile() throws IOException {
-        return new ClientFile(tempFile.getCanonicalFile());
+    public ClientFile getCanonicalFile() {
+        //return new ClientFile(tempFile.getCanonicalFile());
+        //ClientFile should already be a canonical file
+        return this;
     }
-    public ClientFile[] listFiles(FileFilter filter) {
+    public CompletableFuture<List<ClientFile>> listFiles(String filter) {
+        /*
         File[] listFiles = tempFile.listFiles(filter);
         ClientFile[] result = new ClientFile[listFiles.length];
         for (int i = 0; i < listFiles.length; i++) {
             result[i] = new ClientFile(listFiles[i]);
         }
         return result;
+         */
+        String type = filter.equalsIgnoreCase("dir") ? "file_list_dir" : "file_list_files";
+        return NetworkHandlerClient.requestServerListFileAsync(type, path);
     }
 }

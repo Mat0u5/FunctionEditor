@@ -7,6 +7,7 @@ import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
+import java.io.File;
 import java.util.List;
 
 public record FileDataPayload(
@@ -27,5 +28,13 @@ public record FileDataPayload(
     @Override
     public CustomPayload.Id<? extends CustomPayload> getId() {
         return ID;
+    }
+    public static FileDataPayload getFromFile(String requestInfo, File file) {
+        FileDataPayload fileDataPayload = new FileDataPayload(
+                requestInfo,
+                file.getPath(),file.getName(),
+                List.of(file.canRead(), file.isFile(), file.exists(), file.isDirectory())
+        );
+        return fileDataPayload;
     }
 }

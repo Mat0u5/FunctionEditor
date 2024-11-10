@@ -9,6 +9,8 @@ import fi.dy.masa.malilib.render.RenderUtils;
 import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import net.mat0u5.functioneditor.files.*;
 import net.mat0u5.functioneditor.gui.IDirectoryNavigator;
@@ -104,11 +106,11 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
 
     protected void addNonFilteredContents(ClientFile dir) {
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        this.addMatchingEntriesToList(this.getDirectoryFilter(), dir, list, (String)null, (String)null);
+        this.addMatchingEntriesToList("dir", dir, list, (String)null, (String)null);
         Collections.sort(list);
         this.listContents.addAll(list);
         list.clear();
-        this.addMatchingEntriesToList(FILE_FILTER, dir, list, (String)null, (String)null);
+        this.addMatchingEntriesToList("file", dir, list, (String)null, (String)null);
         Collections.sort(list);
         this.listContents.addAll(list);
     }
@@ -122,7 +124,7 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
 
     protected void addFilteredContents(ClientFile dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        this.addMatchingEntriesToList(this.getDirectoryFilter(), dir, list, filterText, prefix);
+        this.addMatchingEntriesToList("dir", dir, list, filterText, prefix);
         Collections.sort(list);
         listOut.addAll(list);
         list.clear();
@@ -141,36 +143,46 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
             list.clear();
         }
 
-        this.addMatchingEntriesToList(FILE_FILTER, dir, list, filterText, prefix);
+        this.addMatchingEntriesToList("file", dir, list, filterText, prefix);
         Collections.sort(list);
         listOut.addAll(list);
     }
 
-    protected void addMatchingEntriesToList(FileFilter filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
-        ClientFile[] var6 = dir.listFiles(filter);
-        int var7 = var6.length;
+    protected void addMatchingEntriesToList(String filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
 
-        for(int var8 = 0; var8 < var7; ++var8) {
-            ClientFile file = var6[var8];
-            String name = FileUtils.getNameWithoutExtension(file.getName().toLowerCase());
-            if (filterText == null || this.matchesFilter(name, filterText)) {
-                list.add(new Client_DirectoryEntry(Client_DirectoryEntryType.fromFile(file), dir, file.getName(), displayNamePrefix));
+        CompletableFuture<List<ClientFile>> future = dir.listFiles("dir");
+
+        try {
+            List<ClientFile> var6 = future.get();
+            int var7 = var6.size();
+
+            for(int var8 = 0; var8 < var7; ++var8) {
+                ClientFile file = var6.get(var8);
+                String name = FileUtils.getNameWithoutExtension(file.getName().toLowerCase());
+                if (filterText == null || this.matchesFilter(name, filterText)) {
+                    list.add(new Client_DirectoryEntry(Client_DirectoryEntryType.fromFile(file), dir, file.getName(), displayNamePrefix));
+                }
             }
-        }
-
+        } catch (Exception e) {}
     }
 
     protected List<ClientFile> getSubDirectories(ClientFile dir) {
         List<ClientFile> dirs = new ArrayList<>();
-        ClientFile[] var3 = dir.listFiles(DIRECTORY_FILTER);
-        int var4 = var3.length;
+        CompletableFuture<List<ClientFile>> future = dir.listFiles("dir");
+        try {
+            System.out.println("trying future...");
+            List<ClientFile> var3 = future.get(); // This will block until the future is complete
+            int var4 = var3.size();
 
-        for(int var5 = 0; var5 < var4; ++var5) {
-            ClientFile file = var3[var5];
-            dirs.add(file);
-        }
+            for(int var5 = 0; var5 < var4; ++var5) {
+                ClientFile file = var3.get(var5);
+                dirs.add(file);
+            }
 
-        return dirs;
+            return dirs;
+        } catch (Exception e) {}
+        System.out.println("test??");
+        return new ArrayList<>();
     }
 
     protected ClientFile getRootDirectory() {
@@ -205,12 +217,13 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     }
 
     public void switchToParentDirectory() {
-        ClientFile parent = this.currentDirectory.getParentFile();
-        if (!this.currentDirectoryIsRoot() && parent != null && this.currentDirectory.getAbsolutePath().contains(this.getRootDirectory().getAbsolutePath())) {
-            this.switchToDirectory(parent);
-        } else {
-            this.switchToRootDirectory();
-        }
+        this.currentDirectory.getParentFile().thenAccept(parent ->{
+            if (!this.currentDirectoryIsRoot() && parent != null && this.currentDirectory.getAbsolutePath().contains(this.getRootDirectory().getAbsolutePath())) {
+                this.switchToDirectory(parent);
+            } else {
+                this.switchToRootDirectory();
+            }
+        });
     }
     public static class Client_DirectoryEntry  implements Comparable<Client_DirectoryEntry> {
         private final Client_DirectoryEntryType type;
