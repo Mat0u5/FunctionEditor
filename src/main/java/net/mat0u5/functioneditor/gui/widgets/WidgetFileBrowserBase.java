@@ -104,85 +104,75 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         this.reCreateListEntryWidgets();
     }
 
-    protected void addNonFilteredContents(ClientFile dir) {
+    protected CompletableFuture<Void> addNonFilteredContents(ClientFile dir) {
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        this.addMatchingEntriesToList("dir", dir, list, (String)null, (String)null);
-        Collections.sort(list);
-        this.listContents.addAll(list);
-        list.clear();
-        this.addMatchingEntriesToList("file", dir, list, (String)null, (String)null);
-        Collections.sort(list);
-        this.listContents.addAll(list);
+        CompletableFuture<Void> dirFuture = this.addMatchingEntriesToList("dir", dir, list, (String)null, (String)null).thenRun(()->{
+            Collections.sort(list);
+            this.listContents.addAll(list);
+            list.clear();
+        });
+        return dirFuture.thenCompose( v ->
+                this.addMatchingEntriesToList("file", dir, list, (String)null, (String)null)
+        )
+        .thenRun(()->{
+            Collections.sort(list);
+            this.listContents.addAll(list);
+        });
     }
 
-    protected void addFilteredContents(ClientFile dir) {
+    protected CompletableFuture<Void> addFilteredContents(ClientFile dir) {
         String filterText = this.widgetSearchBar.getFilter();
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        this.addFilteredContents(dir, filterText, list, (String)null);
-        this.listContents.addAll(list);
+        return this.addFilteredContents(dir, filterText, list, (String)null).thenRun(()->{
+            this.listContents.addAll(list);
+        });
     }
 
-    protected void addFilteredContents(ClientFile dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
+    protected CompletableFuture<Void> addFilteredContents(ClientFile dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        this.addMatchingEntriesToList("dir", dir, list, filterText, prefix);
-        Collections.sort(list);
-        listOut.addAll(list);
-        list.clear();
-
-        for (ClientFile subDir : this.getSubDirectories(dir)) {
-            String pre;
-            if (prefix != null) {
-                pre = prefix + subDir.getName() + "/";
-            } else {
-                pre = subDir.getName() + "/";
-            }
-
-            this.addFilteredContents(subDir, filterText, list, pre);
+        CompletableFuture<Void> dirFuture = this.addMatchingEntriesToList("dir", dir, list, filterText, prefix).thenRun(()->{
             Collections.sort(list);
             listOut.addAll(list);
             list.clear();
-        }
-
-        this.addMatchingEntriesToList("file", dir, list, filterText, prefix);
-        Collections.sort(list);
-        listOut.addAll(list);
+        });
+        dirFuture.thenCompose( v ->
+                this.getSubDirectories(dir)
+        ).thenAccept( listClientFile -> {
+            for (ClientFile subDir : listClientFile) {
+                String pre;
+                if (prefix != null) {
+                    pre = prefix + subDir.getName() + "/";
+                } else {
+                    pre = subDir.getName() + "/";
+                }
+                dirFuture.thenCompose(v -> this.addFilteredContents(subDir, filterText, list, pre)).thenRun(()->{
+                    Collections.sort(list);
+                    listOut.addAll(list);
+                    list.clear();
+                });
+            }
+        });
+        return dirFuture.thenCompose( v ->
+            this.addMatchingEntriesToList("file", dir, list, filterText, prefix)
+        ).thenRun(()->{
+            Collections.sort(list);
+            listOut.addAll(list);
+        });
     }
 
-    protected void addMatchingEntriesToList(String filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
-
-        CompletableFuture<List<ClientFile>> future = dir.listFiles("dir");
-
-        try {
-            List<ClientFile> var6 = future.get();
-            int var7 = var6.size();
-
-            for(int var8 = 0; var8 < var7; ++var8) {
-                ClientFile file = var6.get(var8);
+    protected CompletableFuture<Void> addMatchingEntriesToList(String filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
+        return dir.listFiles("dir").thenAccept(fileList -> {
+            for (ClientFile file : fileList) {
                 String name = FileUtils.getNameWithoutExtension(file.getName().toLowerCase());
                 if (filterText == null || this.matchesFilter(name, filterText)) {
                     list.add(new Client_DirectoryEntry(Client_DirectoryEntryType.fromFile(file), dir, file.getName(), displayNamePrefix));
                 }
             }
-        } catch (Exception e) {}
+        });
     }
 
-    protected List<ClientFile> getSubDirectories(ClientFile dir) {
-        List<ClientFile> dirs = new ArrayList<>();
-        CompletableFuture<List<ClientFile>> future = dir.listFiles("dir");
-        try {
-            System.out.println("trying future...");
-            List<ClientFile> var3 = future.get(); // This will block until the future is complete
-            int var4 = var3.size();
-
-            for(int var5 = 0; var5 < var4; ++var5) {
-                ClientFile file = var3.get(var5);
-                dirs.add(file);
-            }
-
-            return dirs;
-        } catch (Exception e) {}
-        System.out.println("test??");
-        return new ArrayList<>();
+    protected CompletableFuture<List<ClientFile>> getSubDirectories(ClientFile dir) {
+        return dir.listFiles("dir");
     }
 
     protected ClientFile getRootDirectory() {
