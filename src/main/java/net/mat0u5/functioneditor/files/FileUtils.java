@@ -31,7 +31,8 @@ public class FileUtils {
                 file = file.getParent();
             }*/
 
-            return file.getAbsolutePath().replaceFirst(rootPath.getAbsolutePath(),"");
+            //return file.getAbsolutePath().replaceFirst(rootPath.getAbsolutePath(),"");
+            return file.getAbsolutePath();
         }
     }
 

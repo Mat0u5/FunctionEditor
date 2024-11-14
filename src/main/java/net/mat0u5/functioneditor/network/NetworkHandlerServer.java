@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class NetworkHandlerServer {
 
@@ -52,6 +53,7 @@ public class NetworkHandlerServer {
         ServerPlayNetworking.send(player, payload);
     }
     public static void handlePacketRequest(ServerPlayerEntity player, RequestDataPayload payload) {
+        UUID requestId = UUID.fromString(payload.requestUUID());
         String requestInfo = payload.requestInfo();
         String additionalInfo = payload.additionalInfo();
         if (requestInfo.equalsIgnoreCase("file_data") ||
@@ -69,7 +71,7 @@ public class NetworkHandlerServer {
                     file = file.getCanonicalFile();
                 } catch (Exception e){}
             }
-            FileDataPayload fileDataPayload = FileDataPayload.getFromFile(requestInfo, file);
+            FileDataPayload fileDataPayload = FileDataPayload.getFromFile(requestId, requestInfo, file);
             ServerPlayNetworking.send(player, fileDataPayload);
         }
         else if (requestInfo.equalsIgnoreCase("file_list_dir") ||
@@ -78,9 +80,8 @@ public class NetworkHandlerServer {
             String filePath = additionalInfo;
             File mainFile = new File(filePath);
             File[] files = mainFile.listFiles(filter);
-
             if (files == null) return;
-            ListFileDataPayload listFileDataPayload = ListFileDataPayload.getFromFiles(requestInfo,files);
+            ListFileDataPayload listFileDataPayload = ListFileDataPayload.getFromFiles(requestId, requestInfo,files);
             ServerPlayNetworking.send(player, listFileDataPayload);
         }
     }

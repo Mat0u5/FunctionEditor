@@ -2,12 +2,14 @@ package net.mat0u5.functioneditor.gui;
 
 import net.mat0u5.functioneditor.files.ClientFile;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface IDirectoryNavigator {
     ClientFile getCurrentDirectory();
 
-    void switchToDirectory(ClientFile dir);
+    CompletableFuture<Void> switchToDirectory(ClientFile dir);
 
-    void switchToParentDirectory();
+    CompletableFuture<Void> switchToParentDirectory();
 
-    void switchToRootDirectory();
+    CompletableFuture<Void> switchToRootDirectory();
 }

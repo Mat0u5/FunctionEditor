@@ -10,13 +10,13 @@ import java.io.FileFilter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import net.mat0u5.functioneditor.files.*;
 import net.mat0u5.functioneditor.gui.IDirectoryNavigator;
 import net.mat0u5.functioneditor.gui.IFileBrowserIconProvider;
 import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowserBase.Client_DirectoryEntry;
 import net.mat0u5.functioneditor.gui.widgets.WidgetFileBrowserBase.Client_WidgetDirectoryEntry;
+import net.mat0u5.functioneditor.network.NetworkHandlerClient;
 import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,102 +77,101 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         return width - 6;
     }
 
-    protected void updateDirectoryNavigationWidget() {
-        int x = this.posX + 2;
-        int y = this.posY + 4;
-        this.directoryNavigationWidget = new WidgetDirectoryNavigation(x, y, this.browserEntryWidth, 14, this.currentDirectory, this.getRootDirectory(), this, this.iconProvider);
-        this.browserEntriesOffsetY = this.directoryNavigationWidget.getHeight() + 3;
-        this.widgetSearchBar = this.directoryNavigationWidget;
+    protected CompletableFuture<Void> updateDirectoryNavigationWidget() {
+        //TODO
+        return CompletableFuture.runAsync(() -> {
+            int x = this.posX + 2;
+            int y = this.posY + 4;
+            this.directoryNavigationWidget = new WidgetDirectoryNavigation(x, y, this.browserEntryWidth, 14, this.currentDirectory, this.getRootDirectory(), this, this.iconProvider);
+            this.browserEntriesOffsetY = this.directoryNavigationWidget.getHeight() + 3;
+            this.widgetSearchBar = this.directoryNavigationWidget;
+        });
     }
 
-    public void refreshEntries() {
-        this.updateDirectoryNavigationWidget();
-        this.refreshBrowserEntries();
+    public CompletableFuture<Void> _refreshEntries() {
+        return this.updateDirectoryNavigationWidget()
+                .thenCompose(ignored -> this._refreshBrowserEntries());
     }
 
-    protected void refreshBrowserEntries() {
+    protected CompletableFuture<Void> _refreshBrowserEntries() {
         this.listContents.clear();
         ClientFile dir = this.currentDirectory;
         if (dir.isDirectory() && dir.canRead()) {
-            if (this.hasFilter()) {
-                this.addFilteredContents(dir);
-            } else {
-                this.addNonFilteredContents(dir);
-            }
+            return (this.hasFilter() ? this.addFilteredContents(dir) : this.addNonFilteredContents(dir))
+                    .thenRun(this::reCreateListEntryWidgets);
         }
-
-        this.reCreateListEntryWidgets();
+        return CompletableFuture.completedFuture(null);
     }
 
     protected CompletableFuture<Void> addNonFilteredContents(ClientFile dir) {
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        CompletableFuture<Void> dirFuture = this.addMatchingEntriesToList("dir", dir, list, (String)null, (String)null).thenRun(()->{
-            Collections.sort(list);
-            this.listContents.addAll(list);
-            list.clear();
-        });
-        return dirFuture.thenCompose( v ->
-                this.addMatchingEntriesToList("file", dir, list, (String)null, (String)null)
-        )
-        .thenRun(()->{
-            Collections.sort(list);
-            this.listContents.addAll(list);
-        });
+        return this.addMatchingEntriesToList("dir", dir, list, null, null)
+                .thenRun(() -> {
+                    Collections.sort(list);
+                    this.listContents.addAll(list);
+                    list.clear();
+                }).thenCompose(ignored -> this.addMatchingEntriesToList("file", dir, list, null, null))
+                .thenRun(() -> {
+                    Collections.sort(list);
+                    this.listContents.addAll(list);
+                });
     }
 
     protected CompletableFuture<Void> addFilteredContents(ClientFile dir) {
         String filterText = this.widgetSearchBar.getFilter();
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        return this.addFilteredContents(dir, filterText, list, (String)null).thenRun(()->{
-            this.listContents.addAll(list);
-        });
+        return this.addFilteredContents(dir, filterText, list, null)
+                .thenRun(() -> this.listContents.addAll(list));
     }
 
     protected CompletableFuture<Void> addFilteredContents(ClientFile dir, String filterText, List<Client_DirectoryEntry> listOut, @Nullable String prefix) {
         List<Client_DirectoryEntry> list = new ArrayList<>();
-        CompletableFuture<Void> dirFuture = this.addMatchingEntriesToList("dir", dir, list, filterText, prefix).thenRun(()->{
-            Collections.sort(list);
-            listOut.addAll(list);
-            list.clear();
-        });
-        dirFuture.thenCompose( v ->
-                this.getSubDirectories(dir)
-        ).thenAccept( listClientFile -> {
-            for (ClientFile subDir : listClientFile) {
-                String pre;
-                if (prefix != null) {
-                    pre = prefix + subDir.getName() + "/";
-                } else {
-                    pre = subDir.getName() + "/";
-                }
-                dirFuture.thenCompose(v -> this.addFilteredContents(subDir, filterText, list, pre)).thenRun(()->{
+        return this.addMatchingEntriesToList("dir", dir, list, filterText, prefix)
+                .thenRun(() -> {
                     Collections.sort(list);
                     listOut.addAll(list);
                     list.clear();
+                }).thenCompose(ignored -> this.getSubDirectories(dir))
+                .thenCompose(subDirs -> {
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
+                    for (ClientFile subDir : subDirs) {
+                        String pre = (prefix != null ? prefix + subDir.getName() + "/" : subDir.getName() + "/");
+                        futures.add(this.addFilteredContents(subDir, filterText, list, pre));
+                    }
+                    return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+                }).thenCompose(ignored -> this.addMatchingEntriesToList("file", dir, list, filterText, prefix))
+                .thenRun(() -> {
+                    Collections.sort(list);
+                    listOut.addAll(list);
                 });
-            }
-        });
-        return dirFuture.thenCompose( v ->
-            this.addMatchingEntriesToList("file", dir, list, filterText, prefix)
-        ).thenRun(()->{
-            Collections.sort(list);
-            listOut.addAll(list);
-        });
     }
 
-    protected CompletableFuture<Void> addMatchingEntriesToList(String filter, ClientFile dir, List<Client_DirectoryEntry> list, @Nullable String filterText, @Nullable String displayNamePrefix) {
-        return dir.listFiles("dir").thenAccept(fileList -> {
-            for (ClientFile file : fileList) {
+    protected CompletableFuture<Void> addMatchingEntriesToList(String filter, ClientFile dir, List<Client_DirectoryEntry> list,
+                                                               @Nullable String filterText, @Nullable String displayNamePrefix) {
+        return dir.listFiles(filter).thenAccept(files -> {
+            for (ClientFile file : files) {
                 String name = FileUtils.getNameWithoutExtension(file.getName().toLowerCase());
                 if (filterText == null || this.matchesFilter(name, filterText)) {
                     list.add(new Client_DirectoryEntry(Client_DirectoryEntryType.fromFile(file), dir, file.getName(), displayNamePrefix));
                 }
             }
+        }).exceptionally(e -> {
+            e.printStackTrace();
+            return null;
         });
     }
 
     protected CompletableFuture<List<ClientFile>> getSubDirectories(ClientFile dir) {
-        return dir.listFiles("dir");
+        return dir.listFiles("dir").thenApply(files -> {
+            List<ClientFile> dirs = new ArrayList<>();
+            for (ClientFile file : files) {
+                dirs.add(file);
+            }
+            return dirs;
+        }).exceptionally(e -> {
+            e.printStackTrace();
+            return new ArrayList<>();
+        });
     }
 
     protected ClientFile getRootDirectory() {
@@ -195,25 +194,30 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         return this.currentDirectory;
     }
 
-    public void switchToDirectory(ClientFile dir) {
-        this.clearSelection();
-        this.currentDirectory = FileUtils.getCanonicalFileIfPossible(dir);
-        this.refreshEntries();
-        this.resetScrollbarPosition();
-    }
-
-    public void switchToRootDirectory() {
-        this.switchToDirectory(this.getRootDirectory());
-    }
-
-    public void switchToParentDirectory() {
-        this.currentDirectory.getParentFile().thenAccept(parent ->{
-            if (!this.currentDirectoryIsRoot() && parent != null && this.currentDirectory.getAbsolutePath().contains(this.getRootDirectory().getAbsolutePath())) {
-                this.switchToDirectory(parent);
+    public CompletableFuture<Void> switchToParentDirectory() {
+        return this.currentDirectory.getParentFile().thenCompose(parent -> {
+            if (parent != null && !this.currentDirectoryIsRoot() &&
+                    this.currentDirectory.getAbsolutePath().contains(this.getRootDirectory().getAbsolutePath())) {
+                return this.switchToDirectory(parent);
             } else {
-                this.switchToRootDirectory();
+                return this.switchToRootDirectory();
             }
+        }).exceptionally(e -> {
+            e.printStackTrace();
+            return null;
         });
+    }
+
+    public CompletableFuture<Void> switchToDirectory(ClientFile dir) {
+        this.clearSelection();
+        return CompletableFuture.runAsync(() -> {
+                    this.currentDirectory = FileUtils.getCanonicalFileIfPossible(dir);
+                }).thenCompose(ignored -> this._refreshEntries())
+                .thenRun(this::resetScrollbarPosition);
+    }
+
+    public CompletableFuture<Void> switchToRootDirectory() {
+        return this.switchToDirectory(this.getRootDirectory());
     }
     public static class Client_DirectoryEntry  implements Comparable<Client_DirectoryEntry> {
         private final Client_DirectoryEntryType type;
@@ -291,7 +295,9 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
 
         protected boolean onMouseClickedImpl(int mouseX, int mouseY, int mouseButton) {
             if (this.entry.getType() == Client_DirectoryEntryType.DIRECTORY) {
-                this.navigator.switchToDirectory(new ClientFile(this.entry.getDirectory(),this.entry.getName()));
+                String newPath = this.entry.getDirectory().getAbsolutePath()+"\\"+this.entry.getName();
+                System.out.println(newPath);
+                NetworkHandlerClient.requestServerFileAsync("file_data",newPath).thenAccept(this.navigator::switchToDirectory);
                 return true;
             } else {
                 return super.onMouseClickedImpl(mouseX, mouseY, mouseButton);
