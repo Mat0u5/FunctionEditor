@@ -52,7 +52,7 @@ public class WidgetDirectoryNavigation extends WidgetSearchBar {
             }
 
             if (hoveredIcon == this.iconCreateDir) {
-                String title = "malilib.gui.title.create_directory";
+                String title = "functioneditor.create_directory";
                 DirectoryCreator creator = new DirectoryCreator(this.currentDir, this.navigator);
                 GuiTextInputFeedback gui = new GuiTextInputFeedback(256, title, "", GuiUtils.getCurrentScreen(), creator);
                 GuiBase.openGui(gui);
@@ -104,11 +104,11 @@ public class WidgetDirectoryNavigation extends WidgetSearchBar {
         if (!this.searchOpen) {
             WidgetIcon hoveredIcon = this.getHoveredIcon(mouseX, mouseY);
             if (hoveredIcon == this.iconRoot) {
-                RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList(StringUtils.translate("malilib.gui.button.hover.directory_widget.root", new Object[0])), drawContext);
+                RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList("Switch dir to root"), drawContext);
             } else if (hoveredIcon == this.iconUp) {
-                RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList(StringUtils.translate("malilib.gui.button.hover.directory_widget.up", new Object[0])), drawContext);
+                RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList("Switch dir to parent"), drawContext);
             } else if (hoveredIcon == this.iconCreateDir) {
-                RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList(StringUtils.translate("malilib.gui.button.hover.directory_widget.create_directory", new Object[0])), drawContext);
+                RenderUtils.drawHoverText(mouseX, mouseY, Arrays.asList("Create directory"), drawContext);
             }
         }
 

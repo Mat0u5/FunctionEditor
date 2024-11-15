@@ -16,6 +16,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 
+import java.util.List;
+
 
 public class ClientCommands {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher,
@@ -31,7 +33,7 @@ public class ClientCommands {
     public static int execute(FabricClientCommandSource source)  {
         final PlayerEntity self = source.getPlayer();
         if (!DataManagerClient.hasRootDirectory()) {
-            NetworkHandlerClient.requestServerFileAsync("file_data","root").thenAccept(payload -> {
+            NetworkHandlerClient.requestServerFileAsync("file_data", List.of("root")).thenAccept(payload -> {
                 DataManagerClient.setClientRootDirectory(payload);
                 //GuiBase.openGui(MainClient.guiFileBrowser);
                 GuiBase.openGui(new GuiFileBrowser());

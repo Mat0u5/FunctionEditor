@@ -81,8 +81,8 @@ public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_Wi
         String label;
         ButtonGeneric button;
 
-        label = StringUtils.translate("litematica.gui.label.schematic_load.checkbox.create_placement");
-        String hover = StringUtils.translate("litematica.gui.label.schematic_load.hoverinfo.create_placement");
+        label = "temp1";
+        String hover = "temp1hover";
         WidgetCheckBox checkbox = new WidgetCheckBox(x, y, Icons.CHECKBOX_UNSELECTED, Icons.CHECKBOX_SELECTED, label, hover);
         checkbox.setListener(new CheckboxListener());
         checkbox.setChecked(false, false);
@@ -120,7 +120,7 @@ public class GuiFileBrowser extends GuiListBase<Client_DirectoryEntry, Client_Wi
 
         if (type == ButtonListener.Type.MATERIAL_LIST)
         {
-            button.setHoverStrings(StringUtils.translate("litematica.gui.button.hover.material_list_shift_to_select_sub_regions"));
+            button.setHoverStrings("temp2");
         }
 
         this.addButton(button, listener);

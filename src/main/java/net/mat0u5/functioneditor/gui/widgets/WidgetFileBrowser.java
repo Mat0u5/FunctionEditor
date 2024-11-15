@@ -28,7 +28,7 @@ public class WidgetFileBrowser extends WidgetFileBrowserBase
         super(x, y, width, height, parent.getBrowserContext(),
                 parent.getDefaultDirectory(), selectionListener, Icons.FILE_ICON_LITEMATIC);
 
-        this.title = StringUtils.translate("litematica.gui.title.schematic_browser");
+        this.title = "File Browser";
         this.infoWidth = 170;
         this.infoHeight = 290;
         this.parent = parent;

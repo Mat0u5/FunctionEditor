@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NetworkHandlerClient {
+    //private static final Map<UUID, CompletableFuture<Void>> serverResponseVoidMap = new ConcurrentHashMap<>();
     private static final Map<UUID, CompletableFuture<ClientFile>> serverResponseFileMap = new ConcurrentHashMap<>();
     private static final Map<UUID, CompletableFuture<List<ClientFile>>> serverResponseListFileMap = new ConcurrentHashMap<>();
 
@@ -72,13 +73,21 @@ public class NetworkHandlerClient {
         ClientPlayNetworking.send(payload);
     }
 
-    public static void sendPacketRequestToServer(UUID requestId, String requestInfo, String additionalInfo) {
+    //public static CompletableFuture<Void> sendReturnablePacketRequestToServer(UUID requestId, String requestInfo, List<String> additionalInfo) {
+    //    RequestDataPayload payload = new RequestDataPayload(requestId.toString(), requestInfo, additionalInfo); // Include request ID
+    //    CompletableFuture<Void> future = new CompletableFuture<>();
+    //    serverResponseVoidMap.put(requestId, future);
+    //    ClientPlayNetworking.send(payload);
+    //    Main.LOGGER.info("[PACKET] Requested returnable packet (" + requestInfo + "), (" + additionalInfo + ") with ID: " + requestId);
+    //}
+
+    public static void sendPacketRequestToServer(UUID requestId, String requestInfo, List<String> additionalInfo) {
         RequestDataPayload payload = new RequestDataPayload(requestId.toString(), requestInfo, additionalInfo); // Include request ID
         ClientPlayNetworking.send(payload);
         Main.LOGGER.info("[PACKET] Requested packet (" + requestInfo + "), (" + additionalInfo + ") with ID: " + requestId);
     }
 
-    public static CompletableFuture<ClientFile> requestServerFileAsync(String requestInfo, String additionalInfo) {
+    public static CompletableFuture<ClientFile> requestServerFileAsync(String requestInfo, List<String> additionalInfo) {
         UUID requestId = UUID.randomUUID(); // Generate unique ID for the request
         CompletableFuture<ClientFile> future = new CompletableFuture<>();
         serverResponseFileMap.put(requestId, future);
@@ -86,7 +95,7 @@ public class NetworkHandlerClient {
         return future;
     }
 
-    public static CompletableFuture<List<ClientFile>> requestServerListFileAsync(String requestInfo, String additionalInfo) {
+    public static CompletableFuture<List<ClientFile>> requestServerListFileAsync(String requestInfo, List<String> additionalInfo) {
         UUID requestId = UUID.randomUUID(); // Generate unique ID for the request
         CompletableFuture<List<ClientFile>> future = new CompletableFuture<>();
         serverResponseListFileMap.put(requestId, future);

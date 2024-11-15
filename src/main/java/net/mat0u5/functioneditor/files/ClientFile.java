@@ -62,7 +62,7 @@ public class ClientFile {
     }
     public CompletableFuture<ClientFile> getParentFile() {
         //return new ClientFile(tempFile.getParentFile());
-        return NetworkHandlerClient.requestServerFileAsync("file_data_getparent",path);
+        return NetworkHandlerClient.requestServerFileAsync("file_data_getparent",List.of(path));
     }
     public ClientFile getCanonicalFile() {
         //return new ClientFile(tempFile.getCanonicalFile());
@@ -79,6 +79,6 @@ public class ClientFile {
         return result;
          */
         String type = filter.equalsIgnoreCase("dir") ? "file_list_dir" : "file_list_files";
-        return NetworkHandlerClient.requestServerListFileAsync(type, path);
+        return NetworkHandlerClient.requestServerListFileAsync(type, List.of(path));
     }
 }

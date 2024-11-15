@@ -21,8 +21,6 @@ import net.minecraft.client.gui.DrawContext;
 import org.jetbrains.annotations.Nullable;
 
 public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry, Client_WidgetDirectoryEntry> implements IDirectoryNavigator {
-    protected static final FileFilter FILE_FILTER = FileFilters.FILE_FILTER_SUPPORTED;
-    protected static final FileFilter DIRECTORY_FILTER = FileFilters.FILE_FILTER_DIRECTORIES;
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     protected ClientFile currentDirectory;
     protected final String browserContext;
@@ -39,6 +37,7 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
 
         this.setSize(width, height);
         this.updateDirectoryNavigationWidget();
+        this.switchToRootDirectory();
     }
 
     public boolean onKeyTyped(int keyCode, int scanCode, int modifiers) {
@@ -77,20 +76,17 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         return width - 6;
     }
 
-    protected CompletableFuture<Void> updateDirectoryNavigationWidget() {
-        //TODO
-        return CompletableFuture.runAsync(() -> {
-            int x = this.posX + 2;
-            int y = this.posY + 4;
-            this.directoryNavigationWidget = new WidgetDirectoryNavigation(x, y, this.browserEntryWidth, 14, this.currentDirectory, this.getRootDirectory(), this, this.iconProvider);
-            this.browserEntriesOffsetY = this.directoryNavigationWidget.getHeight() + 3;
-            this.widgetSearchBar = this.directoryNavigationWidget;
-        });
+    protected void updateDirectoryNavigationWidget() {
+        int x = this.posX + 2;
+        int y = this.posY + 4;
+        this.directoryNavigationWidget = new WidgetDirectoryNavigation(x, y, this.browserEntryWidth, 14, this.currentDirectory, this.getRootDirectory(), this, this.iconProvider);
+        this.browserEntriesOffsetY = this.directoryNavigationWidget.getHeight() + 3;
+        this.widgetSearchBar = this.directoryNavigationWidget;
     }
 
     public CompletableFuture<Void> _refreshEntries() {
-        return this.updateDirectoryNavigationWidget()
-                .thenCompose(ignored -> this._refreshBrowserEntries());
+        this.updateDirectoryNavigationWidget();
+        return this._refreshBrowserEntries();
     }
 
     protected CompletableFuture<Void> _refreshBrowserEntries() {
@@ -178,16 +174,12 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
         return DataManagerClient.getDatapackBaseDirectory();
     }
 
-    protected FileFilter getDirectoryFilter() {
-        return DIRECTORY_FILTER;
-    }
-
     protected Client_WidgetDirectoryEntry createListEntryWidget(int x, int y, int listIndex, boolean isOdd, Client_DirectoryEntry entry) {
         return new Client_WidgetDirectoryEntry(x, y, this.browserEntryWidth, this.getBrowserEntryHeightFor(entry), isOdd, entry, listIndex, this, this.iconProvider);
     }
 
     protected boolean currentDirectoryIsRoot() {
-        return this.currentDirectory.equals(getRootDirectory());
+        return this.currentDirectory.getAbsolutePath().equalsIgnoreCase(getRootDirectory().getAbsolutePath());
     }
 
     public ClientFile getCurrentDirectory() {
@@ -197,7 +189,7 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
     public CompletableFuture<Void> switchToParentDirectory() {
         return this.currentDirectory.getParentFile().thenCompose(parent -> {
             if (parent != null && !this.currentDirectoryIsRoot() &&
-                    this.currentDirectory.getAbsolutePath().contains(this.getRootDirectory().getAbsolutePath())) {
+                this.currentDirectory.getAbsolutePath().startsWith(this.getRootDirectory().getAbsolutePath())) {
                 return this.switchToDirectory(parent);
             } else {
                 return this.switchToRootDirectory();
@@ -297,7 +289,7 @@ public class WidgetFileBrowserBase extends WidgetListBase<Client_DirectoryEntry,
             if (this.entry.getType() == Client_DirectoryEntryType.DIRECTORY) {
                 String newPath = this.entry.getDirectory().getAbsolutePath()+"\\"+this.entry.getName();
                 System.out.println(newPath);
-                NetworkHandlerClient.requestServerFileAsync("file_data",newPath).thenAccept(this.navigator::switchToDirectory);
+                NetworkHandlerClient.requestServerFileAsync("file_data",List.of(newPath)).thenAccept(this.navigator::switchToDirectory);
                 return true;
             } else {
                 return super.onMouseClickedImpl(mouseX, mouseY, mouseButton);

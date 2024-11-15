@@ -30,9 +30,11 @@ public class FileUtils {
                 }
                 file = file.getParent();
             }*/
-
-            //return file.getAbsolutePath().replaceFirst(rootPath.getAbsolutePath(),"");
-            return file.getAbsolutePath();
+            String joined = file.getAbsolutePath();
+            if (joined.startsWith(rootPath.getAbsolutePath())) {
+                joined = "."+joined.substring(rootPath.getAbsolutePath().length());
+            }
+            return joined;
         }
     }
 

@@ -4,7 +4,11 @@ import fi.dy.masa.malilib.gui.Message.MessageType;
 import fi.dy.masa.malilib.interfaces.IStringConsumerFeedback;
 import fi.dy.masa.malilib.util.InfoUtils;
 import net.mat0u5.functioneditor.files.ClientFile;
+import net.mat0u5.functioneditor.network.NetworkHandlerClient;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.UUID;
 
 public class DirectoryCreator implements IStringConsumerFeedback {
     protected final ClientFile dir;
@@ -21,23 +25,10 @@ public class DirectoryCreator implements IStringConsumerFeedback {
             InfoUtils.showGuiOrActionBarMessage(MessageType.ERROR, "malilib.error.invalid_directory", new Object[]{string});
             return false;
         } else {
-            //TODO - send packet to server
-            /*
-            File file = new File(this.dir, string);
-            if (file.exists()) {
-                InfoUtils.showGuiOrActionBarMessage(MessageType.ERROR, "malilib.error.file_or_directory_already_exists", new Object[]{file.getAbsolutePath()});
-                return false;
-            } else if (!file.mkdirs()) {
-                InfoUtils.showGuiOrActionBarMessage(MessageType.ERROR, "malilib.error.failed_to_create_directory", new Object[]{file.getAbsolutePath()});
-                return false;
-            } else {
-                if (this.navigator != null) {
-                    this.navigator.switchToDirectory(file);
-                }
-
-                InfoUtils.showGuiOrActionBarMessage(MessageType.SUCCESS, "malilib.message.directory_created", new Object[]{string});
-            }
-            */
+            NetworkHandlerClient.requestServerFileAsync("create_dir", List.of(this.dir.getAbsolutePath(),string)).thenAccept(file -> {
+                System.out.println("test");
+                this.navigator.switchToDirectory(file);
+            });
             return true;
         }
     }
